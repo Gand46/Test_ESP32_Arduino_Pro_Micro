@@ -24,6 +24,15 @@ AVRDUDE_FLAGS      = -V -q -q
 # Default target
 all:
 
+.PHONY: build_txt
+build_txt: all
+	@mkdir -p build
+	@for ext in elf hex bin eep map lss sym; do \
+		if [ -f $(TARGET).$$ext ]; then \
+			cp $(TARGET).$$ext build/$(TARGET).$$ext.txt; \
+		fi; \
+	done
+
 DMBS_LUFA_PATH ?= $(LUFA_PATH)/Build/LUFA
 include $(DMBS_LUFA_PATH)/lufa-sources.mk
 include $(DMBS_LUFA_PATH)/lufa-gcc.mk
