@@ -7,8 +7,12 @@ OPTIMIZATION = s
 TARGET       = pro_micro_xid_bridge
 SRC          = src/main.c src/Descriptors.c src/UART.c src/Bridge.c src/BridgeProtocol.c $(LUFA_SRC_USB)
 
-LUFA_PATH    = ../LUFA/LUFA
-LUFA_OPTS    = -DUSB_DEVICE_ONLY
+LUFA_PATH    ?= ../LUFA/LUFA
+ifeq ($(wildcard $(LUFA_PATH)/Build/LUFA/lufa-sources.mk),)
+LUFA_PATH    := ../../LUFA/LUFA
+endif
+
+LUFA_OPTS    = USB_DEVICE_ONLY
 
 CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -DUSE_FLASH_DESCRIPTORS -IConfig/ -Isrc -I. -std=gnu11 -Wall -Wextra -Werror
 LD_FLAGS     =
@@ -17,8 +21,14 @@ AVRDUDE_PROGRAMMER = avr109
 AVRDUDE_PORT       = /dev/ttyACM0
 AVRDUDE_FLAGS      = -V -q -q
 
-include $(LUFA_PATH)/Build/lufa_build.mk
-include $(LUFA_PATH)/Build/lufa_sources.mk
-include $(LUFA_PATH)/Build/lufa_atprogram.mk
+# Default target
+all:
 
-SRC += $(LUFA_SRC_USB_DEVICE)
+DMBS_LUFA_PATH ?= $(LUFA_PATH)/Build/LUFA
+include $(DMBS_LUFA_PATH)/lufa-sources.mk
+include $(DMBS_LUFA_PATH)/lufa-gcc.mk
+
+DMBS_PATH      ?= $(LUFA_PATH)/Build/DMBS/DMBS
+include $(DMBS_PATH)/core.mk
+include $(DMBS_PATH)/gcc.mk
+include $(DMBS_PATH)/atprogram.mk
